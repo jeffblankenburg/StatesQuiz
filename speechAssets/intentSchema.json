@@ -1,0 +1,14 @@
+{"intents": [
+    {"intent": "ElementIntent", "slots":[{"name": "element", "type": "ELEMENT"}]},
+    {"intent": "SymbolIntent", "slots":[{"name": "letterone", "type": "LETTER"},
+                                        {"name": "lettertwo", "type": "LETTER"},
+                                        {"name": "letterthree", "type": "LETTER"}]},
+    {"intent": "AMAZON.StartOverIntent"},
+    {"intent": "AMAZON.RepeatIntent"},
+    {"intent": "AMAZON.HelpIntent"},
+    {"intent": "AMAZON.YesIntent"},
+    {"intent": "AMAZON.NoIntent"},
+    {"intent": "AMAZON.StopIntent"},
+    {"intent": "AMAZON.CancelIntent"}
+  ]
+}

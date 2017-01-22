@@ -1,0 +1,5 @@
+ElementIntent about {element}
+
+SymbolIntent {letterone}
+SymbolIntent {letterone} {lettertwo}
+SymbolIntent {letterone} {lettertwo} {letterthree}
