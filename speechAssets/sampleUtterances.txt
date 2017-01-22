@@ -1,5 +1,3 @@
-ElementIntent about {element}
+StateNameIntent about {state_name}
 
-SymbolIntent {letterone}
-SymbolIntent {letterone} {lettertwo}
-SymbolIntent {letterone} {lettertwo} {letterthree}
+StateAbbrIntent about {state_abbr}
