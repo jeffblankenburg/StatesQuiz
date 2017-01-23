@@ -28,8 +28,11 @@ const handlers = {
     },
     "StateAbbrIntent": function() {
         console.log(D + "STATE ABBREVIATION INTENT");
+        writeSlots(this.event.request.intent.slots);
+        var letter1 = this.event.request.intent.slots.letterone.value;
+        var letter2 = this.event.request.intent.slots.lettertwo.value;
 
-        var requestedState = this.event.request.intent.slots.state_abbr.value;
+        var requestedState = letter1 + letter2;
         console.log(D + "Requested State: " + requestedState);
 
         var stateArray = this.t("STATES");
