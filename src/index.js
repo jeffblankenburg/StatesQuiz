@@ -1,6 +1,9 @@
 'use strict';
 
 const Alexa = require('alexa-sdk');
+var VoiceInsights = require('voice-insights-sdk'),
+VI_APP_TOKEN = 'b6690680-e6ee-11a6-113f-02f814b60257';
+
 const D = "----------";
 
 const APP_ID = undefined;  // TODO replace with your app ID (OPTIONAL).
@@ -12,8 +15,10 @@ var states = {
 
 const handlers = {
      "LaunchRequest": function() {
-        console.log(D + "LAUNCHREQUEST");
-        this.emit(":ask", "LaunchRequest", "LaunchRequest");
+        console.log(D + "LaunchRequest");
+        VoiceInsights.track("LaunchRequest", null, "LaunchRequest", (error, response) => {
+            this.emit(":ask", "LaunchRequest", "LaunchRequest");
+        });
      },
      "StateNameIntent": function() {
         console.log(D + "STATE NAME INTENT");
@@ -29,7 +34,12 @@ const handlers = {
         console.log(D + "state.length == " + state.length);
 
         console.log(D + "state[0].abbreviation == " + state[0].abbreviation);
-        this.emit(":tell", "<say-as interpret-as='spell-out'>" + state[0].abbreviation + "</say-as>");
+
+        var speech = "<say-as interpret-as='spell-out'>" + state[0].abbreviation + "</say-as>";
+        var intent = this.event.request.intent;
+        VoiceInsights.track(intent.name, intent.slots, speech, (error, response) => {
+            this.emit(":tell", speech);
+        });
     },
     "StateAbbrIntent": function() {
         console.log(D + "STATE ABBREVIATION INTENT");
@@ -53,7 +63,11 @@ const handlers = {
     "CapitolsQuizIntent": function() {
         console.log(D + "CAPITOLS QUIZ INTENT.  SETTING STATE = CAPITOLSQUIZ.  REDIRECT TO CapitolsQuiz HANDLERS.");
         this.handler.state = states.CAPITOLSQUIZ;
-        this.emitWithState("CapitolsQuiz");
+
+        var intent = this.event.request.intent;
+        VoiceInsights.track(intent.name, intent.slots, "CAPITOLS QUIZ INTENT.  SETTING STATE = CAPITOLSQUIZ.  REDIRECT TO CapitolsQuiz HANDLERS.", (error, response) => {
+            this.emitWithState("CapitolsQuiz");
+        });
     },
     "Unhandled": function() {
         console.log(D + "UNHANDLED!");
@@ -67,11 +81,20 @@ var capQuizHandlers = Alexa.CreateStateHandler(states.CAPITOLSQUIZ,{
         this.attributes["counter"] = 0;
         this.attributes["quizscore"] = 0;
         console.log(D + "RESET COUNTER TO ZERO.");
-        this.emit(":ask", "Starting Capitols Quiz.  Each round, I will give you 10 states, and you will need to tell me the capitol of that state.  Ready?", "Are you ready to start the capitols quiz?");
+
+        var speech = "Starting Capitols Quiz.  Each round, I will give you 10 states, and you will need to tell me the capitol of that state.  Ready?";
+        var repeat = "Are you ready to start the capitols quiz?";
+        var intent = this.event.request.intent;
+        VoiceInsights.track(intent.name, intent.slots, speech, (error, response) => {
+            this.emit(":ask", speech, repeat);
+        });
     },
     "AMAZON.YesIntent": function() {
         console.log(D + "USER WANTS TO START A CAPITOLS QUIZ. REDIRECTING TO QUIZ ASKER.");
-        this.emitWithState("AskQuestion");
+        var intent = this.event.request.intent;
+        VoiceInsights.track(intent.name, intent.slots, "USER WANTS TO START A CAPITOLS QUIZ. REDIRECTING TO QUIZ ASKER.", (error, response) => {
+            this.emitWithState("AskQuestion");
+        });
     },
     "AskQuestion": function() {
         console.log(D + "ASKING QUESTION.");
@@ -82,8 +105,14 @@ var capQuizHandlers = Alexa.CreateStateHandler(states.CAPITOLSQUIZ,{
         this.attributes["quizstate"] = state;
         this.attributes["counter"]++;
         console.log(D + "INCREMENTING COUNTER TO " + this.attributes["counter"]);
-        var response = this.attributes["response"] + "Here is your " + getOrdinal(this.attributes["counter"]) + " question.  What is the capitol of "  + state.name + "?";
-        this.emit(":ask", response, response);
+        var question = "Here is your " + getOrdinal(this.attributes["counter"]) + " question.  What is the capitol of "  + state.name + "?";
+        var speech = this.attributes["response"] + question;
+
+        var intent = this.event.request.intent;
+        VoiceInsights.track(intent.name, intent.slots, speech, (error, response) => {
+            this.emit(":ask", speech, question);
+        });
+        
     },
     "CapitolNameIntent": function() {
         console.log(D + "CAPITOL NAME INTENT.  STATE == CAPITOLSQUIZ.");
@@ -123,7 +152,12 @@ var capQuizHandlers = Alexa.CreateStateHandler(states.CAPITOLSQUIZ,{
             console.log(D + "CURRENT SCORE: " + this.attributes["quizscore"]);
             response += "Your current score is " + this.attributes["quizscore"] + ". ";
             this.attributes["response"] = response;
-            this.emitWithState("AskQuestion");
+
+            var intent = this.event.request.intent;
+            VoiceInsights.track(intent.name, intent.slots, response, (error, response) => {
+                this.emitWithState("AskQuestion");
+            });
+            
         }
         //this.emit(":ask", response, response);
     },
@@ -137,6 +171,7 @@ var capQuizHandlers = Alexa.CreateStateHandler(states.CAPITOLSQUIZ,{
 exports.handler = (event, context) => {
     const alexa = Alexa.handler(event, context);
     alexa.AppId = APP_ID;
+    VoiceInsights.initialize(event.session, VI_APP_TOKEN);
     alexa.resources = languageStrings;
     alexa.registerHandlers(handlers, capQuizHandlers);
     alexa.execute();
